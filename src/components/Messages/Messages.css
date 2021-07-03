@@ -1,0 +1,28 @@
+
+ul{
+  list-style-type:none;
+  margin: 0;
+  padding: 0;
+}
+
+ul li{
+    background-color: rgba(100,100,100, .2);
+    padding: 1rem 0;
+    margin: 1rem 0;
+}
+
+.prev, .next {
+margin: 0 5px;
+}
+
+.prev.disabled,
+.next.disabled {
+  pointer-events: none;
+  box-shadow: none;
+  color: #999;
+}
+
+.prev.hidden,
+.next.hidden {
+  visibility: hidden;
+}
