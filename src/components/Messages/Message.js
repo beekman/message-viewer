@@ -1,6 +1,6 @@
 import React from 'react';
 
-const Message = ({ content, sentAt, senderUuid }) => {
+const Message = ({ content, sentAt, senderUuid, uuid }) => {
   const sentDate = new Date(sentAt);
 
   const hh = sentDate.getHours();
@@ -17,9 +17,13 @@ const Message = ({ content, sentAt, senderUuid }) => {
 
   const readableDate = sentDate.toDateString() + ' at ' + h + ':' + minutes + ':' + seconds + ' ' + dd;
 
+
+
   return (
     <>
-      <h3>{readableDate}</h3>
+      <header>
+        <h3>{readableDate}</h3>
+      </header>
       <p>senderUuid: {senderUuid}</p>
       <p>content: {content}</p>
     </>

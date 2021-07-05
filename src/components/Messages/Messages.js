@@ -1,26 +1,24 @@
-import { React, useState, useEffect } from 'react';
+import { React, useState } from 'react';
 import Message from './Message';
-import styles from './Messages.css';
+import './Messages.css';
 import prevIcon from '../../images/arrow-prev.svg';
 import nextIcon from '../../images/arrow-next.svg';
+import sortAscIcon from '../../images/arrow-ascending.svg';
+import sortDescIcon from '../../images/arrow-descending.svg';
 
 const Messages = ({ messages }) => {
   const [isAscendingSort, setAscendingSort] = useState(true);
-  const messagesPerPage = 5;
-  const [pages] = useState(Math.round(messages.length / messagesPerPage));
   const [currentPage, setCurrentPage] = useState(1);
-
-
-  let uniqueMessages = messages.filter((v, i, a) => a
+  const messagesPerPage = 5;
+  const uniqueSortedMessages = messages.filter((v, i, a) => a
     .findIndex(t => (t.uuid === v.uuid && t.content === v.content)) === i)
     .sort((a, b) => {
-      if(isAscendingSort) {
-        return new Date(a.sentAt) - new Date(b.sentAt);
-      }
-      else {
-        return new Date(b.sentAt) - new Date(a.sentAt);
-      }
+      return new Date(a.sentAt) - new Date(b.sentAt);
     });
+
+  const [messageList, setMessageList] = useState(uniqueSortedMessages);
+
+  const [pages, setPages] = useState(Math.round(messageList.length / messagesPerPage));
 
   const goToPreviousPage = () => {
     setCurrentPage((page) => page - 1);
@@ -30,61 +28,72 @@ const Messages = ({ messages }) => {
     setCurrentPage((page) => page + 1);
   };
 
-  const changePage = (event) => {
-    const pageNumber = Number(event.target.textContent);
-    setCurrentPage(pageNumber);
-  };
-
   const getPaginatedMessages = () => {
     const startIndex = currentPage * messagesPerPage - messagesPerPage;
     const endIndex = startIndex + messagesPerPage;
-    return uniqueMessages.slice(startIndex, endIndex);
+    return messageList.slice(startIndex, endIndex);
   };
-
-  const getPaginationGroup = () => {
-    const pageLimit = 5;
-    let start = Math.floor((currentPage - 1) / pageLimit) * pageLimit;
-    return new Array(pageLimit).fill().map((_, idx) => start + idx + 1);
-  };
-
-  const handleSortClick = () => setAscendingSort(toggled => !toggled);
 
   const currentMessages = getPaginatedMessages();
-  console.log(currentMessages);
 
-  const MessageList = getPaginatedMessages().map((d, i) => {
+  const handleSortClick = () => {
+    setAscendingSort(toggled => !toggled);
+    setMessageList(messageList.sort((a, b) => {
+      if(isAscendingSort) {
+        return new Date(b.sentAt) - new Date(a.sentAt);
+      }
+      else {
+        return new Date(a.sentAt) - new Date(b.sentAt);
+      }
+    }));
+  };
+
+  const handleRemoveMessageClick = (e) => {
+    const uuid = e.target.getAttribute("id");
+    setMessageList(messageList.filter(message => message.uuid !== uuid));
+    let newPagesCount = Math.round((messageList.length + 1) / messagesPerPage);
+    if(newPagesCount === 0) newPagesCount = 1; // "Correct" pages count to 1 when there are no messages
+    setPages(newPagesCount);
+  };
+
+  const MessageList = currentMessages.map((d, i) => {
     return (
-      <Message key={i} {...currentMessages[i]} />
+      <li key={i} className="Message">
+        <span id={currentMessages[i].uuid} className='delete' onClick={handleRemoveMessageClick}>X</span>
+        <Message {...currentMessages[i]} />
+      </li>
     );
   });
 
   return (
     <>
-      <section>
-        <button onClick={handleSortClick} >
-          Sort By {isAscendingSort ? 'ASC' : 'DESC'}
-        </button>
+      <section className="Messages">
+        <nav>
+          <div className="pagination">
+            <button
+              onClick={goToPreviousPage}
+              className={`prev ${currentPage <= 1 ? 'hidden' : ''}`}
+            >
+              <img alt='Previous Page Icon' src={prevIcon} />
+            </button>
 
+            Page {currentPage} of {pages}
+
+            <button
+              onClick={goToNextPage}
+              className={`next ${currentPage >= pages ? 'hidden' : ''}`}
+            >
+              <img alt='Next Page Icon' src={nextIcon} />
+            </button>
+          </div>
+          <button onClick={handleSortClick} >
+            {isAscendingSort ? <img alt="Ascending Sort" src={sortAscIcon} /> : <img alt="Descending Sort" src={sortDescIcon} />}
+          </button>
+        </nav>
         <ul>
           {MessageList}
         </ul>
-        <div className="pagination">
-          <button
-            onClick={goToPreviousPage}
-            className={`prev ${currentPage === 1 ? 'hidden' : ''}`}
-          >
-            <img alt='previous' src={prevIcon} />
-          </button>
 
-          Page {currentPage} of {pages}
-
-          <button
-            onClick={goToNextPage}
-            className={`next ${currentPage === pages ? 'hidden' : ''}`}
-          >
-          <img alt='next' src={nextIcon}/>
-          </button>
-        </div>
       </section>
     </>
   );
