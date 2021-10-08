@@ -1,6 +1,6 @@
 # Deduplicated Message Viewer
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A simple React-based message viewing app that de-duplicates messages with the same UUID and Sender UUID.
 
 ## Available Scripts
 
